@@ -1,0 +1,5 @@
+# Packed into assets.cpp / assets.hpp by the 32blit asset tool.
+assets.cpp:
+  ../../tests/data/bee-home.beat:
+    name: asset_bee_home
+    type: raw/binary

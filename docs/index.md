@@ -8,8 +8,8 @@ The mechanics and graphics are kept very small on purpose. The same few pieces
 can make a puzzle, a chase, a garden that grows, a story walk or a rhythm game.
 
 !!! info "Status"
-    Work in progress. The file format (v1) is written down. The engine is being
-    built. See the [roadmap](roadmap.md).
+    The engine and its [web](web.md) and [console](console.md) players are done.
+    The no-code editor in the chili creator comes next. See the [roadmap](roadmap.md).
 
 ## The six ideas
 
@@ -53,6 +53,8 @@ You learn one idea, then combine it.
 ## A game in one picture
 
 This is the Bee Home example. Seven rule cards make the whole game.
+
+![Bee Home](assets/shots/bee-home.png){ .pixel }
 
 <div markdown>
 <span class="card"><b class="w">WHEN</b> you press an arrow <b class="t">THEN</b> you move that way</span>
