@@ -1,0 +1,13 @@
+title: Chili Beat
+description: Plays Chili Beat games. Copy .beat files onto the console's CHILICHIP drive.
+author: chilichip
+splash:
+  file: assets/splash.png
+icon:
+  file: assets/icon.png
+version: v0.1.0
+# A handler: ChiliChip OS hides this app from the home screen and lists the
+# .beat files on the drive instead, opening each one with it.
+category: handler
+filetypes: beat
+url: https://github.com/chili-chip/chili-beat

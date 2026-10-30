@@ -83,7 +83,8 @@ uint32_t Engine::random() {
 }
 
 void Engine::restart() {
-  screens_.assign(game_.screens.size(), ScreenState{});
+  saved_.assign(game_.screens.size(), Saved{});
+  board_ = {};
   next_id_ = 1;
   beat_ = 0;
   clock_ = 0;
@@ -97,7 +98,7 @@ void Engine::restart() {
   tune_ = kNone;
   lead_ = beat_voice_ = Voice{};
   blips_ = {};
-  screen_ = game_.start;
+  screen_ = kNone;  // nothing to save
   enter(game_.start, std::nullopt, 0);
   run_trigger(Trigger::Type::Start);
   settle();
@@ -135,33 +136,38 @@ void Engine::mix(Frame& frame) const {
 }
 
 void Engine::enter(int index, std::optional<Thing> walker, int cell) {
-  // You things belong to the screen you are on, so they leave with you.
-  for (auto& slot : live()) {
-    if (slot && is_you(*slot)) slot.reset();
-  }
-  screen_ = index;
-  ScreenState& state = screens_[index];
-  const Screen& screen = game_.screens[index];
-  if (!state.visited || screen.reset) {
-    state.board = {};
+  // Save the screen you leave. You things belong to the screen you are on, so
+  // they leave with you.
+  if (screen_ != kNone) {
+    Saved& out = saved_[screen_];
+    out.visited = true;
     for (int i = 0; i < kCells; ++i) {
-      int8_t kind = screen.things[i];
-      if (kind != kNone && !game_.things[kind].you) {
-        state.board[i] = Thing{kind, Dir::Down, next_id_++, static_cast<uint8_t>(i), 0, 0};
-      }
+      const auto& slot = board_[i];
+      out.kinds[i] = slot && !is_you(*slot) ? slot->kind : kNone;
+      out.dirs[i] = slot ? slot->dir : Dir::Down;
     }
   }
-  state.visited = true;
+  screen_ = index;
+  board_ = {};
+  const Saved& in = saved_[index];
+  const Screen& screen = game_.screens[index];
+  bool fresh = !in.visited || screen.reset;
+  for (int i = 0; i < kCells; ++i) {
+    int8_t kind = fresh ? screen.things[i] : in.kinds[i];
+    if (kind != kNone && !game_.things[kind].you) {
+      board_[i] = Thing{kind, fresh ? Dir::Down : in.dirs[i], next_id_++, static_cast<uint8_t>(i), 0, 0};
+    }
+  }
   if (walker) {
     walker->from = static_cast<uint8_t>(cell);
     walker->moved_at = 0;
-    state.board[cell] = *walker;
+    board_[cell] = *walker;
     return;
   }
   for (int i = 0; i < kCells; ++i) {
     int8_t kind = screen.things[i];
-    if (kind != kNone && game_.things[kind].you && !state.board[i]) {
-      state.board[i] = Thing{kind, Dir::Down, next_id_++, static_cast<uint8_t>(i), 0, 0};
+    if (kind != kNone && game_.things[kind].you && !board_[i]) {
+      board_[i] = Thing{kind, Dir::Down, next_id_++, static_cast<uint8_t>(i), 0, 0};
     }
   }
 }
@@ -462,10 +468,10 @@ bool Engine::move(int cell, Dir dir, int depth) {
       const Screen& next = game_.screens[i];
       if (next.map_x != mx || next.map_y != my) continue;
       int entry = entry_cell(cell, dir);
-      const ScreenState& state = screens_[i];
-      bool fresh = !state.visited || next.reset;
+      const Saved& saved = saved_[i];
+      bool fresh = !saved.visited || next.reset;
       bool full = fresh ? next.things[entry] != kNone && !game_.things[next.things[entry]].you
-                        : state.board[entry].has_value();
+                        : saved.kinds[entry] != kNone;
       if (full) return false;
       change_ = Change{static_cast<int>(i), entry, thing};
       board[cell].reset();

@@ -57,6 +57,8 @@ nav:
       - File format: format.md
       - How a beat runs: beat.md
       - Engine API: engine.md
+      - Web player: web.md
+      - Console player: console.md
   - Develop:
       - Building and testing: develop.md
       - Roadmap: roadmap.md
