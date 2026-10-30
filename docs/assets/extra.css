@@ -1,0 +1,28 @@
+:root {
+  --md-primary-fg-color: #b13e53;
+  --md-primary-fg-color--light: #ef7d57;
+  --md-primary-fg-color--dark: #5d275d;
+  --md-accent-fg-color: #ef7d57;
+}
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: #1a1c2c;
+  --md-primary-fg-color: #333c57;
+}
+
+/* Palette swatches on palette.md */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: .5rem; }
+.swatch { border-radius: .3rem; overflow: hidden; border: 1px solid var(--md-default-fg-color--lightest); font-size: .7rem; }
+.swatch span { display: block; height: 2.6rem; }
+.swatch code { display: block; padding: .2rem .4rem; background: none; }
+
+/* Rule cards on rules.md and examples.md */
+.card { display: block; margin: .3rem 0; padding: .4rem .7rem; border-radius: .3rem;
+  border: 1px solid var(--md-default-fg-color--lightest); font-size: .8rem; }
+.card b { font-family: var(--md-code-font-family); font-size: .65rem; padding: .05rem .35rem;
+  border-radius: .2rem; color: #fff; margin-right: .2rem; }
+.card .w { background: #3b5dc9; }
+.card .i { background: #5d275d; }
+.card .t { background: #257179; }
+
+/* Pixel screenshots */
+img.pixel { image-rendering: pixelated; width: 384px; max-width: 100%; border-radius: .3rem; }
