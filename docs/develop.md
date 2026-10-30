@@ -9,6 +9,8 @@
 | `tests/` | Unit and game tests, with a tiny test runner. |
 | `tests/data/*.beat` | Example and test games. |
 | `tools/beat_shot.cpp` | Plays a game and saves a PNG. |
+| `hosts/wasm/` | Web player: C API, `player.js`, demo page, Node test. See [Web player](web.md). |
+| `hosts/32blit/` | Console player (handler `.blit`). See [Console player](console.md). |
 | `format/schema.json` | The file format, as JSON Schema. |
 | `format/validate.py` | Checks `.beat` files against the schema. |
 | `docs/` | This site (MkDocs). |
@@ -23,8 +25,8 @@ flowchart LR
   end
   E -- Host interface --> T[tests: MockHost]
   E --> S[tools: beat-shot]
-  E -. M4 .-> W[hosts/wasm]
-  E -. M4 .-> B[hosts/32blit]
+  E --> W[hosts/wasm]
+  E --> B[hosts/32blit]
 ```
 
 ## Build and run the tests
@@ -101,3 +103,11 @@ mkdocs build --strict # what CI runs
 - builds the core and runs the tests (with address and undefined-behaviour checks),
 - checks the example games against the schema,
 - builds the docs with `--strict`.
+
+`.github/workflows/build.yml` builds the players:
+
+- the web player with Emscripten, then plays Bee Home to a win in Node,
+- the 32blit player for Linux, and the `.blit` for the console (checked to be an RP2350 build).
+
+When a GitHub release is published, it attaches `chili-beat.js`, `chili-beat.wasm`,
+`player.js` and `chili-beat.blit` to the release.

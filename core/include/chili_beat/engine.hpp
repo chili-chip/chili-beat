@@ -48,7 +48,7 @@ class Engine {
   void restart();
 
   const Game& game() const { return game_; }
-  const Board& board() const { return screens_[screen_].board; }
+  const Board& board() const { return board_; }
   int screen() const { return screen_; }
   uint32_t beat() const { return beat_; }
   uint32_t steps() const { return step_; }
@@ -62,8 +62,11 @@ class Engine {
   const std::vector<uint8_t>& sounds() const { return sounds_; }
 
  private:
-  struct ScreenState {
-    Board board;
+  // A screen you have left: its things and the way they face, but not you things.
+  // Kept small, because a game can have 64 screens and the console has little memory.
+  struct Saved {
+    std::array<int8_t, kCells> kinds{};
+    std::array<Dir, kCells> dirs{};
     bool visited = false;
   };
 
@@ -77,7 +80,7 @@ class Engine {
     int depth = 0;           // bumps so far in this chain
   };
 
-  Board& live() { return screens_[screen_].board; }
+  Board& live() { return board_; }
   bool is_you(const Thing& t) const { return game_.things[t.kind].you; }
   bool matches(const Match& m, int8_t kind) const;
   int cell_of(uint32_t id) const;
@@ -99,7 +102,8 @@ class Engine {
   uint32_t random();
 
   Game game_;
-  std::vector<ScreenState> screens_;
+  Board board_;
+  std::vector<Saved> saved_;
   int screen_ = 0;
   uint32_t next_id_ = 1;
   uint32_t step_ = 0;
