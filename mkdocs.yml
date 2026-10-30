@@ -51,10 +51,14 @@ nav:
   - Make games:
       - Rules: rules.md
       - Palette: palette.md
+      - Sound: sound.md
       - Example games: examples.md
   - Reference:
       - File format: format.md
       - How a beat runs: beat.md
+      - Engine API: engine.md
+      - Web player: web.md
+      - Console player: console.md
   - Develop:
       - Building and testing: develop.md
       - Roadmap: roadmap.md

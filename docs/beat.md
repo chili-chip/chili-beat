@@ -111,8 +111,10 @@ you left it, unless the screen has `reset`.
 
 Entering a screen runs its start rules, then counter rules.
 
-A **go** or a walk to another screen happens after the current card's actions
-finish. Only one screen change happens per step.
+A **go** or a walk to another screen happens after the current press or beat
+is done. If several ask for a change, the first one wins. A go from a start rule
+waits until after the next press or beat, so two screens can't swap forever in
+one step.
 
 ## Text, winning and losing
 

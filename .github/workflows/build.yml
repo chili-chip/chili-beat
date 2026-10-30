@@ -1,0 +1,119 @@
+name: Build players
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+env:
+  EM_VERSION: 6.0.9
+
+jobs:
+  wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: emscripten-core/setup-emsdk@v16
+        with:
+          version: ${{ env.EM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build
+        run: |
+          emcmake cmake -S hosts/wasm -B build-wasm -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-wasm -j
+      - name: Test in Node
+        run: node hosts/wasm/test.mjs build-wasm
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chili-beat-web
+          path: |
+            build-wasm/chili-beat.js
+            build-wasm/chili-beat.wasm
+            build-wasm/player.js
+            build-wasm/index.html
+            build-wasm/bee-home.beat
+          if-no-files-found: error
+      - name: Attach to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build-wasm/chili-beat.js
+            build-wasm/chili-beat.wasm
+            build-wasm/player.js
+
+  blit:
+    name: 32blit ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            cmake-args: ""
+            apt-packages: libsdl2-dev libsdl2-image-dev libsdl2-net-dev
+          - name: Console
+            cmake-args: >-
+              -DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk -DPICO_BOARD=chilichip_vgc
+              -DPICO_PLATFORM=rp2350-arm-s -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/32blit-sdk/pico2.toolchain
+              -DBLIT_EXECUTABLE_PICO_BLIT=1
+            apt-packages: gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: main
+      - uses: actions/checkout@v4
+        with:
+          repository: chili-chip/32blit-sdk
+          path: 32blit-sdk
+      - uses: actions/checkout@v4
+        if: matrix.name == 'Console'
+        with:
+          repository: chili-chip/pico-sdk
+          path: pico-sdk
+          submodules: true
+      - uses: actions/checkout@v4
+        if: matrix.name == 'Console'
+        with:
+          repository: chili-chip/pico-extras
+          path: pico-extras
+      - name: Install tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y ${{ matrix.apt-packages }} pipx
+          pipx install 32blit
+          pipx inject --force 32blit "bitstring<5"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Build
+        run: |
+          cmake -S main/hosts/32blit -B build -DCMAKE_BUILD_TYPE=Release -D32BLIT_DIR=$GITHUB_WORKSPACE/32blit-sdk ${{ matrix.cmake-args }}
+          cmake --build build -j 4
+      - name: Check the .blit is for the console
+        if: matrix.name == 'Console'
+        run: |
+          python3 - build/*.blit <<'PY'
+          import struct, sys
+          # BlitGameHeader: magic, render, tick, init, end, then the uint16 device id
+          for path in sys.argv[1:]:
+              magic, device_id = struct.unpack_from('<4s16xH', open(path, 'rb').read())
+              if magic != b'BLIT' or device_id != 3:
+                  sys.exit(f'{path}: not an RP2350 .blit (magic {magic}, device {device_id})')
+              print(f'{path}: RP2350 .blit')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: matrix.name == 'Console'
+        with:
+          name: chili-beat-blit
+          path: build/*.blit
+          if-no-files-found: error
+      - name: Attach to release
+        if: github.event_name == 'release' && matrix.name == 'Console'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/*.blit
