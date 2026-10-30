@@ -54,6 +54,8 @@ You learn one idea, then combine it.
 
 This is the Bee Home example. Seven rule cards make the whole game.
 
+![Bee Home](assets/shots/bee-home.png){ .pixel }
+
 <div markdown>
 <span class="card"><b class="w">WHEN</b> you press an arrow <b class="t">THEN</b> you move that way</span>
 <span class="card"><b class="w">WHEN</b> Bee bumps Flower <b class="t">THEN</b> Flower becomes Bud · Pollen up 1 · play coin</span>
