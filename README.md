@@ -41,9 +41,10 @@ Needs SDL2 and the 32blit tools (`pip install 32blit "bitstring<5"`).
 ```bash
 cmake -S hosts/32blit -B build-sdl -D32BLIT_DIR=$PWD/../32blit-sdk
 cmake --build build-sdl -j
-./build-sdl/chili-beat --launch_path tests/data/bee-home.beat
+./build-sdl/chili-beat --launch_path ../tests/data/bee-home.beat
 ```
 
+The launch path is relative to `build-sdl/`, not to where you run it from.
 Arrows move, Z is A, X is B. Try the other games in `tests/data/`.
 
 ### 4. Play in the browser (wasm player)

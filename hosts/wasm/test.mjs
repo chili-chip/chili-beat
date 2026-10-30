@@ -52,4 +52,16 @@ assert.equal(player.sound().length, 4);
 
 press("a");
 assert.equal(player.debug().state, "playing");
+
+// A tap that ends before the next step still counts.
+player.load(readFileSync(new URL("../../tests/data/blank.beat", import.meta.url), "utf8"));
+player.press(BUTTONS.right, true);
+player.press(BUTTONS.right, false);
+player.step();
+player.step();
+assert.deepEqual(player.debug().fired, []);
+player.press(BUTTONS.right, true);
+player.press(BUTTONS.right, false);
+player.step();
+assert.deepEqual(player.debug().fired, [0]);
 console.log("wasm: ok");
