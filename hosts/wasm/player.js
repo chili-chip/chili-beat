@@ -38,6 +38,7 @@ export class ChiliBeatPlayer {
       debug: module.cwrap("cb_debug", "number", []),
     };
     this.buttons = 0;       // held now, from keys and press()
+    this.tapped = 0;        // pressed since the last step, so a quick tap is not lost
     this.onStep = null;     // called with debug() after every step, if set
     this.muted = false;
     this.frame = null;
@@ -52,7 +53,8 @@ export class ChiliBeatPlayer {
   restart() { this.api.restart(); }
 
   // One 1/60 s step with a button mask.
-  step(buttons = this.buttons) {
+  step(buttons = this.buttons | this.tapped) {
+    this.tapped = 0;
     this.api.step(buttons);
     if (this.onStep) this.onStep(this.debug());
   }
@@ -80,6 +82,7 @@ export class ChiliBeatPlayer {
   // Press or release a button from your own controls (for example touch).
   press(button, down) {
     this.buttons = down ? this.buttons | button : this.buttons & ~button;
+    if (down) this.tapped |= button;
   }
 
   // Runs the game in a canvas until stop(). Keys are read from `keys`.
