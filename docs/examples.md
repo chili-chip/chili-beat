@@ -37,6 +37,11 @@ so they act as walls.
 <span class="card"><b class="w">WHEN</b> Bee bumps Hive <b class="i">IF</b> Pollen at least 5 <b class="t">THEN</b> you win "The hive is happy."</span>
 <span class="card"><b class="w">WHEN</b> Bee bumps Hive <b class="i">IF</b> Pollen at most 4 <b class="t">THEN</b> say "Bring me 5 pollen."</span>
 
+<figure markdown>
+![Bee Home: the hive asks for pollen](assets/shots/bee-home-hive.png){ .pixel }
+<figcaption>Bump the hive too early and it asks for more.</figcaption>
+</figure>
+
 Note that bumping a flower does not move the bee into its cell: the flower
 becomes a bud and stays. That is why the bee "visits" flowers instead of eating them.
 
@@ -52,6 +57,11 @@ happens until you move.
 <span class="card"><b class="w">WHEN</b> you bump Stone <b class="t">THEN</b> Stone moves that way</span>
 <span class="card"><b class="w">WHEN</b> Crate bumps Hole <b class="t">THEN</b> Hole vanishes · Crate becomes Stone · Holes down 1 · play fill</span>
 <span class="card"><b class="w">WHEN</b> Holes reaches 0 <b class="t">THEN</b> you win "All holes filled!"</span>
+
+<figure markdown>
+![Crate Puzzle after filling one hole](assets/shots/crate-puzzle-one.png){ .pixel }
+<figcaption>After "up, then right six times": one hole is filled with stone.</figcaption>
+</figure>
 
 How a push works, step by step:
 

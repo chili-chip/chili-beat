@@ -27,6 +27,7 @@ if(CHILI_BEAT_BUILD_TESTS)
     tests/test_json.cpp
     tests/test_load.cpp
     tests/test_engine.cpp
+    tests/test_rules.cpp
   )
   target_link_libraries(chili_beat_tests PRIVATE chili_beat)
   target_include_directories(chili_beat_tests PRIVATE core/src)
