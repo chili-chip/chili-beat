@@ -47,7 +47,7 @@ assert.ok(fired.has(1) && fired.has(5), "bump and win rules ran");
 const pixels = player.rgba();
 assert.equal(pixels.length, 128 * 128 * 4);
 assert.deepEqual([...pixels.slice(0, 4)], [0x1a, 0x1c, 0x2c, 255]);  // counter strip, top left
-assert.deepEqual([...pixels.slice(127 * 4, 128 * 4)], [0x38, 0xb7, 0x64, 255]);  // hedge, top right
+assert.deepEqual([...pixels.slice(126 * 4, 127 * 4)], [0x38, 0xb7, 0x64, 255]);  // hedge, top right
 assert.equal(player.sound().length, 4);
 
 press("a");
