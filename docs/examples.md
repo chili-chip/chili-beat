@@ -2,6 +2,8 @@
 
 These games live in [`tests/data/`](https://github.com/chili-chip/chili-beat/tree/main/tests/data).
 They are the editor's templates and the engine's test games at the same time.
+The pictures are real screens, drawn by the engine with `beat-shot` (see
+[Building and testing](develop.md#screenshots)).
 
 | Game | File | Shows |
 |------|------|-------|
@@ -13,11 +15,15 @@ They are the editor's templates and the engine's test games at the same time.
 
 ## Blank
 
+![Blank at the start](assets/shots/blank.png){ .pixel }
+
 A hero in a walled room. Every new game starts here.
 
 <span class="card"><b class="w">WHEN</b> you press an arrow <b class="t">THEN</b> you move that way</span>
 
 ## Bee Home
+
+![Bee Home at the start](assets/shots/bee-home.png){ .pixel }
 
 Collect 5 pollen and bring it home. Flowers you visit turn into buds and grow
 back after 8 beats. A wasp chases you every 2 beats. The hedges have no rules,
@@ -35,6 +41,8 @@ Note that bumping a flower does not move the bee into its cell: the flower
 becomes a bud and stays. That is why the bee "visits" flowers instead of eating them.
 
 ## Crate Puzzle
+
+![Crate Puzzle at the start](assets/shots/crate-puzzle.png){ .pixel }
 
 Push the three crates into the three holes. It plays in **turns**: nothing
 happens until you move.
@@ -62,6 +70,8 @@ sequenceDiagram
 
 ## Garden Toy
 
+![Garden Toy at the start](assets/shots/garden-toy.png){ .pixel }
+
 Press A to plant a seed in front of you. Seeds grow into sprouts and then into
 flowers, each step a 1 in 3 chance every 4 beats. There is no win and no lose.
 
@@ -72,6 +82,8 @@ flowers, each step a 1 in 3 chance every 4 beats. There is no win and no lose.
 <span class="card"><b class="w">WHEN</b> you bump Flower <b class="t">THEN</b> say "What a lovely flower."</span>
 
 ## Every Action
+
+![Every Action at the start](assets/shots/every-action.png){ .pixel }
 
 Not a real game. It uses every trigger, condition and action, two screens, two
 counters and two *you* kinds, so the engine tests can cover everything with one

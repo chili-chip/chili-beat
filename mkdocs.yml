@@ -55,6 +55,7 @@ nav:
   - Reference:
       - File format: format.md
       - How a beat runs: beat.md
+      - Engine API: engine.md
   - Develop:
       - Building and testing: develop.md
       - Roadmap: roadmap.md

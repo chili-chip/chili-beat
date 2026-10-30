@@ -20,3 +20,14 @@ jobs:
         run: python format/validate.py tests/data/*.beat
       - name: Build docs
         run: mkdocs build --strict
+
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all"
+          cmake --build build -j
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
