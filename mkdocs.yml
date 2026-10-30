@@ -51,6 +51,7 @@ nav:
   - Make games:
       - Rules: rules.md
       - Palette: palette.md
+      - Sound: sound.md
       - Example games: examples.md
   - Reference:
       - File format: format.md

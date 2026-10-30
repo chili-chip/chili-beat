@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "font.hpp"
+#include "sound.hpp"
 
 namespace chili_beat {
 namespace {
@@ -93,10 +94,44 @@ void Engine::restart() {
   pages_.clear();
   change_.reset();
   for (size_t i = 0; i < game_.counters.size(); ++i) counters_[i] = seen_[i] = game_.counters[i].start;
+  tune_ = kNone;
+  lead_ = beat_voice_ = Voice{};
+  blips_ = {};
   screen_ = game_.start;
   enter(game_.start, std::nullopt, 0);
   run_trigger(Trigger::Type::Start);
   settle();
+  music_beat();
+}
+
+// Plays the next step of the screen's tune. A new tune starts from its first step.
+void Engine::music_beat() {
+  int8_t tune = game_.screens[screen_].tune;
+  if (tune != tune_) {
+    tune_ = tune;
+    tune_step_ = 0;
+    lead_ = beat_voice_ = Voice{};
+  }
+  if (tune_ == kNone) return;
+  const Tune& t = game_.tunes[tune_];
+  if (t.lead[tune_step_]) lead_ = Voice{t.lead[tune_step_], step_};
+  if (t.beat[tune_step_]) beat_voice_ = Voice{t.beat[tune_step_], step_};
+  tune_step_ = (tune_step_ + 1) % kTuneSteps;
+}
+
+void Engine::mix(Frame& frame) const {
+  int beat_steps = kStepsPerSecond / game_.tempo;
+  frame.channels = {};
+  if (tune_ != kNone) {
+    Tune::Scale scale = game_.tunes[tune_].scale;
+    frame.channels[0] = sound::lead(scale, lead_.note, step_ - lead_.start, beat_steps);
+    frame.channels[1] = sound::beat(scale, beat_voice_.note, step_ - beat_voice_.start, beat_steps);
+  }
+  for (int i = 0; i < 2; ++i) {
+    if (blips_[i].note) {
+      frame.channels[2 + i] = sound::blip(game_.blips[blips_[i].note - 1], step_ - blips_[i].start);
+    }
+  }
 }
 
 void Engine::enter(int index, std::optional<Thing> walker, int cell) {
@@ -185,6 +220,7 @@ void Engine::update(Host& host) {
   if (time_ >= 1000) time_ = 0;
   Frame frame;
   draw(frame);
+  mix(frame);
   host.present(frame);
 }
 
@@ -215,6 +251,7 @@ void Engine::step(uint8_t buttons) {
   if (clock_ >= kStepsPerSecond) {
     clock_ -= kStepsPerSecond;
     ++clock_beats_;
+    music_beat();
     if (!game_.turns && playing()) world_beat();
   }
 }
@@ -309,7 +346,16 @@ void Engine::act(const Action& action, const Context& ctx) {
       return;
     }
     case T::Say: say(action.text); return;
-    case T::Sound: sounds_.push_back(static_cast<uint8_t>(action.target)); return;
+    case T::Sound: {
+      sounds_.push_back(static_cast<uint8_t>(action.target));
+      // Use a quiet blip channel, or else the one that started first.
+      auto quiet = [&](const Voice& v) {
+        return !v.note || sound::blip(game_.blips[v.note - 1], step_ - v.start).volume == 0;
+      };
+      int i = quiet(blips_[0]) ? 0 : quiet(blips_[1]) ? 1 : blips_[0].start <= blips_[1].start ? 0 : 1;
+      blips_[i] = Voice{static_cast<uint8_t>(action.target + 1), step_};
+      return;
+    }
     case T::Go:
       if (!change_) change_ = Change{action.target, 0, std::nullopt};
       return;

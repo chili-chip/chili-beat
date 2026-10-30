@@ -31,7 +31,7 @@ class MyHost : public chili_beat::Host {
 };
 
 // Every frame of the host:
-engine.update(host);
+engine.update(host);  // calls host.present(frame) with pixels and sound
 ```
 
 ```mermaid
@@ -72,6 +72,11 @@ colours like this:
 ```cpp
 uint32_t rgb = chili_beat::kSweetie16[game.palette[frame.pixels[y * 128 + x]]];
 ```
+
+## Sound
+
+`frame.channels` holds 4 channels: tune lead, tune beat and two blips. Set your
+synth to them on every frame. See [Sound](sound.md#what-the-engine-sends-to-the-player).
 
 ## Buttons
 
