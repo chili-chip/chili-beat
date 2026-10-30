@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/chili-chip/chili-beat/format/schema.json",
+  "title": "Chili Beat game, format v1",
+  "type": "object",
+  "required": ["format", "version", "title", "palette", "tempo", "time", "start", "things", "screens", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "format": { "const": "chili-beat" },
+    "version": { "const": 1 },
+    "title": { "type": "string", "minLength": 1, "maxLength": 32 },
+    "author": { "type": "string", "maxLength": 32 },
+    "palette": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0, "maximum": 15 },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "tempo": { "type": "integer", "minimum": 2, "maximum": 8 },
+    "time": { "enum": ["beat", "turns"] },
+    "seed": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "start": { "$ref": "#/$defs/id" },
+    "counters": {
+      "type": "array",
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/counter" }
+    },
+    "things": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": { "$ref": "#/$defs/thing" }
+    },
+    "screens": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": { "$ref": "#/$defs/screen" }
+    },
+    "rules": {
+      "type": "array",
+      "maxItems": 128,
+      "items": { "$ref": "#/$defs/rule" }
+    },
+    "blips": {
+      "type": "array",
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/blip" }
+    },
+    "tunes": {
+      "type": "array",
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/tune" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]{1,16}$" },
+    "key": { "type": "string", "pattern": "^[!-~]$", "not": { "const": "." } },
+    "who": { "enum": ["you", "it", "bumper", "bumped"] },
+    "way": {
+      "enum": ["up", "down", "left", "right", "forward", "back", "same", "toward", "away", "random"]
+    },
+    "row": { "type": "string", "pattern": "^[0-3]{8}$" },
+    "frame": { "type": "array", "items": { "$ref": "#/$defs/row" }, "minItems": 8, "maxItems": 8 },
+    "layer": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[!-~]{16}$" },
+      "minItems": 16,
+      "maxItems": 16
+    },
+    "counter": {
+      "type": "object",
+      "required": ["id", "name", "icon"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 16 },
+        "icon": { "$ref": "#/$defs/key" },
+        "start": { "type": "integer", "minimum": 0, "maximum": 999 }
+      }
+    },
+    "thing": {
+      "type": "object",
+      "required": ["key", "name", "frames"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "$ref": "#/$defs/key" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 16 },
+        "you": { "type": "boolean" },
+        "frames": { "type": "array", "items": { "$ref": "#/$defs/frame" }, "minItems": 1, "maxItems": 2 }
+      }
+    },
+    "screen": {
+      "type": "object",
+      "required": ["id", "map", "things"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "map": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0, "maximum": 7 },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "tune": { "$ref": "#/$defs/id" },
+        "reset": { "type": "boolean" },
+        "things": { "$ref": "#/$defs/layer" },
+        "ground": { "$ref": "#/$defs/layer" }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "required": ["when", "do"],
+      "additionalProperties": false,
+      "properties": {
+        "when": { "$ref": "#/$defs/trigger" },
+        "if": { "type": "array", "maxItems": 2, "items": { "$ref": "#/$defs/condition" } },
+        "do": { "type": "array", "minItems": 1, "maxItems": 6, "items": { "$ref": "#/$defs/action" } }
+      }
+    },
+    "match": {
+      "anyOf": [{ "$ref": "#/$defs/key" }, { "enum": ["you", "any"] }]
+    },
+    "trigger": {
+      "oneOf": [
+        {
+          "type": "object", "required": ["start"], "additionalProperties": false,
+          "properties": { "start": { "const": true } }
+        },
+        {
+          "type": "object", "required": ["press"], "additionalProperties": false,
+          "properties": { "press": { "enum": ["a", "b", "arrow", "up", "down", "left", "right"] } }
+        },
+        {
+          "type": "object", "required": ["bump"], "additionalProperties": false,
+          "properties": {
+            "bump": { "type": "array", "items": { "$ref": "#/$defs/match" }, "minItems": 2, "maxItems": 2 }
+          }
+        },
+        {
+          "type": "object", "required": ["every", "thing"], "additionalProperties": false,
+          "properties": {
+            "every": { "type": "integer", "minimum": 1, "maximum": 64 },
+            "thing": { "$ref": "#/$defs/match" }
+          }
+        },
+        {
+          "type": "object", "required": ["counter", "reaches"], "additionalProperties": false,
+          "properties": {
+            "counter": { "$ref": "#/$defs/id" },
+            "reaches": { "type": "integer", "minimum": 0, "maximum": 999 }
+          }
+        }
+      ]
+    },
+    "condition": {
+      "oneOf": [
+        {
+          "type": "object", "required": ["chance"], "additionalProperties": false,
+          "properties": { "chance": { "type": "integer", "minimum": 2, "maximum": 64 } }
+        },
+        {
+          "type": "object", "required": ["counter"], "additionalProperties": false,
+          "minProperties": 2, "maxProperties": 2,
+          "properties": {
+            "counter": { "$ref": "#/$defs/id" },
+            "atLeast": { "type": "integer", "minimum": 0, "maximum": 999 },
+            "atMost": { "type": "integer", "minimum": 0, "maximum": 999 },
+            "exactly": { "type": "integer", "minimum": 0, "maximum": 999 }
+          }
+        }
+      ]
+    },
+    "action": {
+      "oneOf": [
+        {
+          "type": "object", "required": ["move"], "additionalProperties": false,
+          "properties": { "move": { "$ref": "#/$defs/way" }, "who": { "$ref": "#/$defs/who" } }
+        },
+        {
+          "type": "object", "required": ["turn"], "additionalProperties": false,
+          "properties": { "turn": { "$ref": "#/$defs/way" }, "who": { "$ref": "#/$defs/who" } }
+        },
+        {
+          "type": "object", "required": ["become"], "additionalProperties": false,
+          "properties": { "become": { "$ref": "#/$defs/key" }, "who": { "$ref": "#/$defs/who" } }
+        },
+        {
+          "type": "object", "required": ["vanish"], "additionalProperties": false,
+          "properties": { "vanish": { "const": true }, "who": { "$ref": "#/$defs/who" } }
+        },
+        {
+          "type": "object", "required": ["make", "to"], "additionalProperties": false,
+          "properties": {
+            "make": { "$ref": "#/$defs/key" },
+            "to": { "$ref": "#/$defs/way" },
+            "who": { "$ref": "#/$defs/who" }
+          }
+        },
+        {
+          "type": "object", "required": ["count"], "additionalProperties": false,
+          "minProperties": 2, "maxProperties": 2,
+          "properties": {
+            "count": { "$ref": "#/$defs/id" },
+            "add": { "type": "integer", "minimum": -999, "maximum": 999 },
+            "set": { "type": "integer", "minimum": 0, "maximum": 999 }
+          }
+        },
+        {
+          "type": "object", "required": ["say"], "additionalProperties": false,
+          "properties": { "say": { "type": "string", "minLength": 1, "maxLength": 64 } }
+        },
+        {
+          "type": "object", "required": ["sound"], "additionalProperties": false,
+          "properties": { "sound": { "$ref": "#/$defs/id" } }
+        },
+        {
+          "type": "object", "required": ["go"], "additionalProperties": false,
+          "properties": { "go": { "$ref": "#/$defs/id" } }
+        },
+        {
+          "type": "object", "required": ["shake"], "additionalProperties": false,
+          "properties": { "shake": { "const": true } }
+        },
+        {
+          "type": "object", "required": ["win"], "additionalProperties": false,
+          "properties": { "win": { "type": "string", "maxLength": 64 } }
+        },
+        {
+          "type": "object", "required": ["lose"], "additionalProperties": false,
+          "properties": { "lose": { "type": "string", "maxLength": 64 } }
+        }
+      ]
+    },
+    "blip": {
+      "type": "object",
+      "required": ["id", "preset"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "preset": { "enum": ["coin", "jump", "hit", "boom", "step", "power", "blip"] },
+        "pitch": { "type": "integer", "minimum": 0, "maximum": 7 },
+        "length": { "type": "integer", "minimum": 0, "maximum": 7 },
+        "slide": { "type": "integer", "minimum": 0, "maximum": 7 }
+      }
+    },
+    "tune": {
+      "type": "object",
+      "required": ["id", "scale", "lead", "beat"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "scale": { "enum": ["major", "minor", "pentatonic-major", "pentatonic-minor"] },
+        "lead": {
+          "type": "array", "minItems": 16, "maxItems": 16,
+          "items": { "type": "integer", "minimum": 0, "maximum": 15 }
+        },
+        "beat": {
+          "type": "array", "minItems": 16, "maxItems": 16,
+          "items": { "type": "integer", "minimum": 0, "maximum": 10 }
+        }
+      }
+    }
+  }
+}
