@@ -47,6 +47,7 @@ Sound starts after the first key press, because browsers block sound until then.
 | `restart()` | Starts the game again. |
 | `press(button, down)` | Press or release a button from your own controls, for example touch buttons. Use `BUTTONS.up` … `BUTTONS.b`. |
 | `muted` | Set to `true` to silence the sound. |
+| `enableSound()` | Turns sound on from your own click handler, for example a "Play tune" button. Keys turn it on by themselves. |
 | `onStep` | If set, called after every step with `debug()`. |
 | `step(buttons)` | Runs one step yourself (tests, replays). |
 | `debug()` | `{ state, screen, beat, counters, fired, sounds, text }`. |
