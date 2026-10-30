@@ -51,6 +51,19 @@ rate. After a long pause it catches up at most a quarter second.
 
 Tests and tools can skip the host and call `step(buttons)` and `draw(frame)` directly.
 
+## What the engine tells you
+
+| Call | Gives |
+|------|-------|
+| `state()` | `Playing`, `Won` or `Lost`. |
+| `text()` | The open text box page, lines split by `\n`, or empty. |
+| `counter(i)` | Value of counter `i`. |
+| `screen()` | Index of the screen you are on. |
+| `beat()` | World beats since the start. |
+| `fired()` | Indexes of the rules that ran during the last step, in order. The creator lights these cards up. |
+| `sounds()` | Blips started during the last step. |
+| `board()` | The 256 cells of the screen, each empty or a `Thing` (kind, facing, id). |
+
 ## Frames
 
 A `Frame` is 128 × 128 colour numbers, 0 to 3, row by row. Turn them into real

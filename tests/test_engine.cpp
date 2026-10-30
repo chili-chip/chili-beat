@@ -27,12 +27,14 @@ TEST(full_cell_with_no_rule_is_a_wall) {
 TEST(walk_off_the_edge_to_the_next_screen) {
   Engine e(helpers::fixture("every-action.beat"));
   CHECK_EQ(e.screen(), 0);
-  play(e, "up 8 right");
+  CHECK_EQ(e.text(), "Find the key.");
+  play(e, "a up 8 right");
   CHECK_EQ(find(e, '@'), cell(15, 7));
   play(e, "right");
   CHECK_EQ(e.screen(), 1);
   CHECK_EQ(find(e, '@'), cell(0, 7));
-  play(e, "left");  // the way back is a wall on screen one
+  CHECK_EQ(e.text(), "Find the key.");  // start rules run on every screen
+  play(e, "a left");
   CHECK_EQ(e.screen(), 0);
   CHECK_EQ(find(e, '@'), cell(15, 7));
 }
