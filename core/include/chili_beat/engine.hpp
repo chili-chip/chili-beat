@@ -40,7 +40,10 @@ class Engine {
   void update(Host& host);
   // One fixed step (1/60 s) with the buttons held now.
   void step(uint8_t buttons);
+  // Fills frame.pixels.
   void draw(Frame& frame) const;
+  // Fills frame.channels.
+  void mix(Frame& frame) const;
   // Starts the game again from the beginning.
   void restart();
 
@@ -92,6 +95,7 @@ class Engine {
   std::optional<Dir> resolve(Way way, int cell, const Context& ctx);
   bool move(int cell, Dir dir, int depth);
   void say(const std::string& text);
+  void music_beat();
   uint32_t random();
 
   Game game_;
@@ -120,6 +124,16 @@ class Engine {
     std::optional<Thing> thing;  // walk: the thing that walked
   };
   std::optional<Change> change_;
+  // Sound
+  struct Voice {
+    uint8_t note = 0;  // tune step value, or blip index + 1; 0 is off
+    uint32_t start = 0;
+  };
+  int8_t tune_ = kNone;
+  int tune_step_ = 0;
+  Voice lead_;
+  Voice beat_voice_;
+  std::array<Voice, 2> blips_{};
 };
 
 }  // namespace chili_beat

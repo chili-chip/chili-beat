@@ -8,8 +8,8 @@ The mechanics and graphics are kept very small on purpose. The same few pieces
 can make a puzzle, a chase, a garden that grows, a story walk or a rhythm game.
 
 !!! info "Status"
-    Work in progress. The file format (v1) and the rules engine are done. Sound
-    and the web and console players come next. See the [roadmap](roadmap.md).
+    Work in progress. The file format (v1), the rules engine and sound are done.
+    The web and console players come next. See the [roadmap](roadmap.md).
 
 ## The six ideas
 
