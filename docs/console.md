@@ -21,6 +21,11 @@ sequenceDiagram
 
 ## Install
 
+Chili Beat comes preinstalled in the console's factory image
+(`vgc-os-factory.uf2`, see the 32blit SDK's
+[Flashing](https://github.com/chili-chip/32blit-sdk/blob/master/docs/console/flashing.md)
+docs). On a console flashed with it, skip to step 4.
+
 1. Get `chili-beat.blit` from a [release](https://github.com/chili-chip/chili-beat/releases)
    (or the `chili-beat-blit` artifact of the "Build players" CI run).
 2. Connect the console by USB. It shows up as a drive called **CHILICHIP**.
