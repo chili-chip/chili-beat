@@ -7,8 +7,11 @@ on:
   release:
     types: [published]
 
+# Read-only by default. Only `publish` may write: it attaches the files the
+# build jobs made and runs no code from this repository, PyPI or the SDK.
+# https://docs.github.com/en/actions/reference/security/secure-use#use-the-principle-of-least-privilege
 permissions:
-  contents: write
+  contents: read
 
 env:
   EM_VERSION: 6.0.9
@@ -18,12 +21,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - uses: emscripten-core/setup-emsdk@4528d102f7230f0e7b276855c01ea1159be0e984 # v16
         with:
           version: ${{ env.EM_VERSION }}
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22
+          # Major only: each run takes the newest security release of the LTS.
+          node-version: "26"
       - name: Build
         run: |
           emcmake cmake -S hosts/wasm -B build-wasm -DCMAKE_BUILD_TYPE=Release
@@ -40,14 +46,6 @@ jobs:
             build-wasm/index.html
             build-wasm/bee-home.beat
           if-no-files-found: error
-      - name: Attach to release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
-        with:
-          files: |
-            build-wasm/chili-beat.js
-            build-wasm/chili-beat.wasm
-            build-wasm/player.js
 
   blit:
     name: 32blit ${{ matrix.name }}
@@ -68,20 +66,24 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           path: main
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           repository: chili-chip/32blit-sdk
           path: 32blit-sdk
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         if: matrix.name == 'Console'
         with:
+          persist-credentials: false
           repository: chili-chip/pico-sdk
           path: pico-sdk
           submodules: true
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         if: matrix.name == 'Console'
         with:
+          persist-credentials: false
           repository: chili-chip/pico-extras
           path: pico-extras
       - name: Install tools
@@ -112,8 +114,27 @@ jobs:
           name: chili-beat-blit
           path: build/*.blit
           if-no-files-found: error
+
+  # The only job that may write: it attaches the release files the build jobs
+  # made. It runs even when one build failed, so the other files still go up.
+  publish:
+    if: ${{ !cancelled() && github.event_name == 'release' }}
+    needs: [wasm, blit]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: chili-beat-*
+          path: release
+          merge-multiple: true
       - name: Attach to release
-        if: github.event_name == 'release' && matrix.name == 'Console'
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
-          files: build/*.blit
+          fail_on_unmatched_files: false
+          files: |
+            release/chili-beat.js
+            release/chili-beat.wasm
+            release/player.js
+            release/*.blit
